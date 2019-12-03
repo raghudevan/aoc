@@ -1,5 +1,5 @@
 // import #day-#problemno.
-import { exec, runTests } from './day-2/2';
+import { exec, runTests } from './day-3/2';
 
 console.log('running advent of code');
 if (runTests()) {
