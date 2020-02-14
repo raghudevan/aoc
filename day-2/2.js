@@ -65,11 +65,11 @@ export function exec() {
   input.push('');
   const [opcodeInput] = formatIO(input);
   const output = opcode(opcodeInput, 0);
-  console.log(output[0]);
-  let x = 77, // (1969 - 121) / 24
-    y = 33;
-  console.log(eval(output[0].replace(/x/, x).replace(/y/, y)));
+  console.log('expression:', output[0]);
+  let x = 0, // (1969 - 121) / 24
+    y = 1;
+  console.log(`eval: ${x} | ${y}`, eval(output[0].replace(/x/, x).replace(/y/, y)));
   const ans = 100 * x + y;
-  console.log(ans);
+  console.log('output:', ans);
   return ans;
 }

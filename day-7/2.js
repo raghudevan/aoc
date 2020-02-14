@@ -80,7 +80,7 @@ function opcode(input, program, insPointer, output) {
       ({ params, error } = getParams(3, program, insPointer, modes));
       if (error) {
         console.log('panic:', error);
-        return {};
+        return { errorCode: 1 };
       } else {
         [p1, p2, p3] = params;
         debug(`adding ${p1} & ${p2} and writing to ${p3}`);
@@ -93,7 +93,7 @@ function opcode(input, program, insPointer, output) {
       ({ params, error } = getParams(3, program, insPointer, modes));
       if (error) {
         console.log('panic:', error);
-        return {};
+        return { errorCode: 1 };
       } else {
         [p1, p2, p3] = params;
         debug(`multiplying ${p1} & ${p2} and writing to ${p3}`);
@@ -106,14 +106,10 @@ function opcode(input, program, insPointer, output) {
       ({ params, error } = getParams(1, program, insPointer, [1]));
       if (error) {
         console.log('panic:', error);
-        return {};
+        return { errorCode: 1 };
       } else {
         const inp = input.pop();
         if (_.isNil(inp)) {
-          console.log(
-            'panic: no more inputs available! halting program:',
-            output
-          );
           // return instruction pointer also so that we know where to start off from
           return { output, insPointer };
         }
@@ -128,7 +124,7 @@ function opcode(input, program, insPointer, output) {
       ({ params, error } = getParams(1, program, insPointer, modes));
       if (error) {
         console.log('panic:', error);
-        return {};
+        return { errorCode: 1 };
       } else {
         [p1] = params;
         debug(`writing ${p1} to output`);
@@ -141,7 +137,7 @@ function opcode(input, program, insPointer, output) {
       ({ params, error } = getParams(2, program, insPointer, modes));
       if (error) {
         console.log('panic:', error);
-        return {};
+        return { errorCode: 1 };
       } else {
         [p1, p2] = params;
         if (p1 !== 0) {
@@ -160,7 +156,7 @@ function opcode(input, program, insPointer, output) {
       ({ params, error } = getParams(2, program, insPointer, modes));
       if (error) {
         console.log('panic:', error);
-        return {};
+        return { errorCode: 1 };
       } else {
         [p1, p2] = params;
         if (p1 === 0) {
@@ -179,7 +175,7 @@ function opcode(input, program, insPointer, output) {
       ({ params, error } = getParams(3, program, insPointer, modes));
       if (error) {
         console.log('panic:', error);
-        return {};
+        return { errorCode: 1 };
       } else {
         [p1, p2, p3] = params;
         if (p1 < p2) {
@@ -209,11 +205,11 @@ function opcode(input, program, insPointer, output) {
     case 99:
       // halt program
       debug('halting program');
-      return { output };
+      return { output, insPointer, errorCode: 0 };
     default:
       // invalid command
       console.log('panic: invalid command:', command);
-      return {};
+      return { errorCode: 1 };
   }
 
   return opcode(input, program, insPointer, output);
@@ -232,55 +228,108 @@ function runDiagnostics(program, minInput = 0, maxInput = 5) {
   return thrusts;
 }
 
-function calculateThrust(program, pseqList) {
-  const progs = pseqList.reduce((progs, pseq) => {
+function makePrograms(program, pseqList) {
+  const programs = pseqList.reduce((progs, pseq) => {
     progs[pseq] = { program: _.cloneDeep(program), insPointer: 0 };
     return progs;
   }, {});
-  return pseqList.reduce((thrust, pseq) => {
-    let { program: progToRun, insPointer } = progs[pseq];
-    if (_.isNil(insPointer)) {
-    } else {
-      ({ output: thrust, insPointer } = opcode(
-        [thrust, pseq],
-        progToRun,
-        insPointer,
-        0
-      ));
-      // TODO: finish this method
-    }
-    return newThrust;
-  }, 0);
+  return programs;
 }
 
-function formatTestInput(input) {
-  const [program, expectedOutput] = input[0].split(' ');
-  return [program.split(',').map(i => ~~i), ~~expectedOutput];
+function calculateThrust(program, pseqList) {
+  const progs = makePrograms(program, pseqList);
+  debug(`program is ${program.length} instructions long`);
+
+  return (function pass(inputThrust, passCount) {
+    let outputThrust, progToRun, insPointer, errorCode;
+    for (let pseq of pseqList) {
+      ({ program: progToRun, insPointer } = progs[pseq]);
+      const inputArray = [inputThrust];
+      if (passCount === 1) {
+        inputArray.push(pseq);
+      }
+      ({ output: outputThrust, insPointer, errorCode } = opcode(inputArray, progToRun, insPointer, 0));
+      debug(`pass count: ${passCount} | input: ${inputThrust} | phase: ${pseq} | instruction pointer at: ${insPointer} | output: ${outputThrust} | ${errorCode}`);
+      if (errorCode === 1) {
+        // something went wrong with the program
+        console.log(`panic: program for ${pseq} errored out!`);
+        return outputThrust;
+      } else if (errorCode === 0 && pseq === pseqList[4]) {
+        // need to halt
+        return outputThrust;
+      }
+      progs[pseq] = { program: progToRun, insPointer };
+      inputThrust = outputThrust;
+    }
+    return pass(outputThrust, passCount + 1);
+  })(0, 1);
+}
+
+function swap(input, i, j) {
+  let tmp = input[i];
+  input[i] = input[j];
+  input[j] = tmp;
+  return input;
+}
+
+function seqGenerator(input, startIndex, endIndex, seqs) {
+  if (startIndex === endIndex) {
+    seqs.push(_.cloneDeep(input));
+    return seqs;
+  }
+
+  for (let i = startIndex; i <= endIndex; i++) {
+    swap(input, startIndex, i);
+    seqGenerator(input, startIndex + 1, endIndex, seqs);
+    swap(input, startIndex, i);
+  }
+
+  return seqs;
+}
+
+function formatTestInput(inputs) {
+  return inputs.map(input => {
+    const [program, expectedOutput] = input.split(' ');
+    return [program.split(',').map(i => ~~i), ~~expectedOutput];
+  })
 }
 
 export function runTests() {
-  const [program, expectedOutput] = formatTestInput(readInput(testFilePath));
-  if (0) {
-    let thrusts = runDiagnostics(program, -3, 1);
-    console.log(thrusts);
-  } else {
-    let pseqList = [4, 3, 2, 1, 0];
-    const maxThrust = calculateThrust(program, pseqList);
-  }
-  const testResult = false;
+  const seqs = seqGenerator([5, 6, 7, 8, 9], 0, 4, []);
+  const inputs = formatTestInput(readInput(testFilePath));
+
+  const testResult = inputs.every(([program, expectedOutput]) => {
+    const { max: maxThrust, seq } = seqs.reduce(({ max, seq }, nextSeq) => {
+      const thrust = calculateThrust(program, nextSeq);
+      if (thrust >= max) {
+        return { max: thrust, seq: nextSeq };
+      }
+      return { max, seq };
+    }, { max: 0 });
+
+    if (maxThrust === expectedOutput) {
+      return true;
+    }
+    console.log(maxThrust, seq, expectedOutput);
+    return false;
+  });
+
   console.log('test result:', testResult);
   return testResult;
 }
 
 export function exec() {
-  const [program, expectedOutput] = formatTestInput(readInput(filePath));
-  if (0) {
-    let thrusts = runDiagnostics(program, 0, 5);
-    console.log(thrusts);
-    return thrusts;
-  } else {
-    const output = calculateThrust(program, [2, 4, 0, 3, 1]);
-    console.log('max thrust:', output);
-    return output;
-  }
+  const seqs = seqGenerator([5, 6, 7, 8, 9], 0, 4, []);
+  const program = readInput(filePath)[0].split(',').map(i => ~~i);
+  const { max: maxThrust, seq } = seqs.reduce(({ max, seq }, nextSeq) => {
+    const thrust = calculateThrust(program, nextSeq);
+    if (thrust >= max) {
+      return { max: thrust, seq: nextSeq };
+    }
+    return { max, seq };
+  }, { max: 0 });
+
+  const output = maxThrust;
+  console.log(`max thrust:`, output);
+  return output;
 }
