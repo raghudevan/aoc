@@ -7,7 +7,6 @@ const testFilePath = "2022/day3/1.test";
 
 // 2. define how your assertions will run
 function assert(input, expectedOutput) {
-  console.log("todo; write assertion");
   const output = coreLogic(input);
   return output === expectedOutput;
 }

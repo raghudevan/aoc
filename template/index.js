@@ -2,8 +2,8 @@ import _ from "lodash";
 import { readInput } from "../../utils";
 
 // 1. ensure file paths for input & tests are correct
-const filePath = "day1/1.in";
-const testFilePath = "day1/1.test";
+const filePath = "{year}/{day}/puzzle.in";
+const testFilePath = "{year}/{day}/test.in";
 
 // 2. define how your assertions will run
 function assert(input, expectedOutput) {
@@ -18,14 +18,11 @@ export function runTests() {
   const testInput = readInput(testFilePath);
 
   // console.log(testInput);
-  const testResult = testInput.every((test) => {
-    // or can be any other logic to get input/expected output from test input
-    const [input, expectedOutput] = test.split(" ");
-    return assert(input, expectedOutput);
-  });
+  const testResult = coreLogic(testInput);
 
   console.log("test results:", testResult);
-  return testResult;
+  console.log("todo; set the expected output");
+  return assert(testResult, undefined);
 }
 
 // 4. write the `coreLogic`; once this is done, you should be able
