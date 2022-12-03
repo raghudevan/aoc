@@ -1,18 +1,49 @@
-import _ from 'lodash';
-import { readInput } from '../utils';
+import _ from "lodash";
+import { readInput } from "../../utils";
 
-const filePath = 'day-3/1.in';
-const testFilePath = 'day-3/1.test';
+// 1. ensure file paths for input & tests are correct
+const filePath = "day1/1.in";
+const testFilePath = "day1/1.test";
 
+// 2. define how your assertions will run
+function assert(input, expectedOutput) {
+  console.log("todo; write assertion");
+  const output = coreLogic(input);
+  return output === expectedOutput;
+}
 
+// 3. tweak this method to invoke `coreLogic` to get an output
+// which will be asserted against the `expectedOutput`
 export function runTests() {
-  const input = readInput(testFilePath);
-  console.log(input);
-  const testResult = false;
-  console.log('test results:', testResult);
+  const testInput = readInput(testFilePath);
+
+  // console.log(testInput);
+  const testResult = testInput.every((test) => {
+    // or can be any other logic to get input/expected output from test input
+    const [input, expectedOutput] = test.split(" ");
+    return assert(input, expectedOutput);
+  });
+
+  console.log("test results:", testResult);
   return testResult;
 }
 
+// 4. write the `coreLogic`; once this is done, you should be able
+// to run your tests
+function coreLogic(input) {
+  console.log("todo; write logic to solve problem");
+  return;
+}
+
+// 5. finally, write the method which will exec your `coreLogic` to
+// get the desired output. key in the desired output into the solutions page
 export function exec() {
-  console.log('todo');
+  console.log(
+    "todo; write core logic to solve the problem and invoke it from here"
+  );
+  const input = readInput(filePath);
+  const output = coreLogic(input);
+
+  // console.log(output)
+  return output;
 }
