@@ -22,4 +22,6 @@ if (runTests()) {
   // if all tests pass, then exec to get ans to solution
   const output = exec();
   console.log("output", output);
+} else {
+  console.log("tests dont pass");
 }

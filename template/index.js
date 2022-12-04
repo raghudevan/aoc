@@ -6,9 +6,8 @@ const filePath = "{year}/{day}/puzzle.in";
 const testFilePath = "{year}/{day}/test.in";
 
 // 2. define how your assertions will run
-function assert(input, expectedOutput) {
+function assert(output, expectedOutput) {
   console.log("todo; write assertion");
-  const output = coreLogic(input);
   return output === expectedOutput;
 }
 

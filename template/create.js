@@ -13,8 +13,8 @@ const templatePath = path.join(__dirname, "index.js");
 const dayPath = path.join(__dirname, `../${year}/${day}`);
 const sol1Path = path.join(dayPath, "1.js");
 const sol2Path = path.join(dayPath, "2.js");
-const testInputPath = path.join(dayPath, "test.input");
-const puzzleInputPath = path.join(dayPath, "puzzle.input");
+const testInputPath = path.join(dayPath, "test.in");
+const puzzleInputPath = path.join(dayPath, "puzzle.in");
 
 // create day folder under year
 fs.mkdirSync(dayPath);
