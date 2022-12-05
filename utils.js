@@ -8,9 +8,9 @@ export function readInput(filePath) {
   const fullPath = path.resolve(__dirname, filePath);
   let input = [];
   try {
-    input = fs.readFileSync(fullPath).toString().split("\n");
+    input = fs.readFileSync(fullPath).toString().replace(/\r/g, "").split("\n");
   } catch (e) {
-    console.log("no file found", fullPath);
+    console.log("no file found", fullPath, e);
   }
   return input;
 }
