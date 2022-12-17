@@ -6,7 +6,7 @@ const [, , day, problem] = process.argv;
 console.log("running advent of code");
 console.log(`day: ${day} | problem: ${problem}`);
 
-const filePath = path.join(__dirname, `2022/${day}/${problem}.js`);
+const filePath = path.join(__dirname, `${year}/${day}/${problem}.js`);
 if (!fs.existsSync(filePath)) {
   console.log(
     `${filePath} doesn't exist; check if day & problem passed to yarn start command is correct!`
