@@ -1,5 +1,5 @@
 import fs from "fs";
-import os from "os";
+import util from "util";
 import path from "path";
 import _ from "lodash";
 
@@ -22,4 +22,21 @@ export function writeToFile(output, filePath) {
   } catch (e) {
     console.log("unable to write file to", filePath);
   }
+}
+
+export function log(toLog, opts = {}) {
+  console.log(
+    util.inspect(toLog, {
+      showHidden: false,
+      depth: 1,
+      colors: true,
+      compact: true,
+      breakLength: 180,
+      ...opts,
+    })
+  );
+}
+
+export function update(msg) {
+  process.stdout.write(`${msg}\r`);
 }
